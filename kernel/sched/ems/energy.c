@@ -292,7 +292,7 @@ static int select_eco_cpu(struct eco_env *eenv)
 		 * lowest energy among the min util cpu for each coregroup.
 		 */
 		energy_cpu = find_min_util_cpu(&mask, eenv->p);
-		if (cpu_selected(energy_cpu)) {
+		if (cpu_selected(energy_cpu) && is_cpu_preemptible(eenv->p, -1, energy_cpu, 0)) {
 			unsigned int energy = calculate_energy(eenv->p, energy_cpu);
 
 			if (energy < best_energy) {
@@ -355,7 +355,8 @@ int select_energy_cpu(struct task_struct *p, int prev_cpu, int sd_flag, int sync
 		return -1;
 
 	if (sysctl_sched_sync_hint_enable && sync)
-		if (cpumask_test_cpu(cpu, &p->cpus_allowed))
+		if (cpumask_test_cpu(cpu, &p->cpus_allowed) &&
+		    is_cpu_preemptible(p, prev_cpu, cpu, sync))
 			return cpu;
 
 	/*

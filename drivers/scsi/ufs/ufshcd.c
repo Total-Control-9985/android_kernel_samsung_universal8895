@@ -7572,6 +7572,7 @@ static struct devfreq_dev_profile ufs_devfreq_profile = {
 static void ufs_sec_send_errinfo (void *data) {
 	static struct ufs_hba *hba = NULL;
 	struct SEC_UFS_counting *err_info;
+	char tmp[17];
 	char buf[16];
 
 	if (data) {
@@ -7585,7 +7586,7 @@ static void ufs_sec_send_errinfo (void *data) {
 	if (&(hba->SEC_err_info))
 	{
 		err_info = &(hba->SEC_err_info);
-		sprintf(buf, "U%dH%dL%dX%dQ%dR%dW%dF%d", 
+		sprintf(tmp, "U%dH%dL%dX%dQ%dR%dW%dF%d", 
 				(err_info->UTP_count.UTP_err > 9) 				/* UTP Error */
 				? 9 : err_info->UTP_count.UTP_err,
 				(err_info->op_count.HW_RESET_count > 9) 		/* HW Reset */
@@ -7602,6 +7603,7 @@ static void ufs_sec_send_errinfo (void *data) {
 				? 9 : err_info->UTP_count.UTR_write_err,
 				(err_info->Fatal_err_count.DFE > 9 				/* Device Fatal Error */
 				? 9 : err_info->Fatal_err_count.DFE));
+		memcpy(buf, tmp, 16);
 		printk(KERN_ERR "%s: Send UFS information to AP : %s\n", __func__, buf);
 		sec_debug_set_extra_info_ufs_error(buf);
 	}
